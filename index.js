@@ -8,8 +8,8 @@ const RECAPTCHA_SUB_STR_FRAME="https://www.google.com/recaptcha/api2/bframe";
 
 export const type = Object.freeze({"invisible": 1, "normal": 2});
 
-const getInvisibleRecaptchaContent = (siteKey, action, onReady) => {
-    const webForm = '<!DOCTYPE html><html><head> ' +
+const getInvisibleRecaptchaContent = (siteKey, action, onReady, lang) => {
+    const webForm = '<!DOCTYPE html><html lang=\'' + lang + '\'><head> ' +
     '<style>  .text-xs-center { text-align: center; } .g-recaptcha { display: inline-block; } </style> ' +
     '<script src="https://www.google.com/recaptcha/api.js?render=' + siteKey + '"></script> ' +
     '<script type="text/javascript"> ' +
@@ -24,8 +24,8 @@ const getInvisibleRecaptchaContent = (siteKey, action, onReady) => {
     return webForm;
 }
 
-const getNormalRecaptchaContent = (config) => {
-    const webForm = '<!DOCTYPE html><html><head> '+
+const getNormalRecaptchaContent = (config, lang) => {
+    const webForm = '<!DOCTYPE html><html lang=\'' + lang + '\'><head> '+
     '<style>  .text-xs-center { text-align: center; } .g-recaptcha { display: inline-block; margin-right: 40px; float: right;} </style> '+
     '<script src="https://www.gstatic.com/firebasejs/5.1.0/firebase-app.js"></script> '+
     '<script src="https://www.gstatic.com/firebasejs/5.1.0/firebase-auth.js"></script> '+
@@ -57,6 +57,7 @@ export default class ReCaptcha extends Component {
         onExecute: PropTypes.func,
         customWebRecaptcha: PropTypes.func,
         reCaptchaType: PropTypes.oneOf(Object.values(type)).isRequired,
+        lang: PropTypes.string
     };
 
     static defaultProps = {
@@ -70,7 +71,8 @@ export default class ReCaptcha extends Component {
             position: 'relative',
             marginBottom: 20
         },
-        reCaptchaType: type.invisible
+        reCaptchaType: type.normal,
+        lang: 'en',
     };
 
     onShouldStartLoadWithRequest = (event) => {
@@ -117,7 +119,8 @@ export default class ReCaptcha extends Component {
             onExecute,
             config,
             reCaptchaType,
-            url
+            url,
+            lang
         } = this.props;
 
         return (
@@ -128,8 +131,8 @@ export default class ReCaptcha extends Component {
                 containerStyle={containerStyle}
                 onMessage={(message) => onExecute(message)}
                 source={{
-                    html: reCaptchaType == type.invisible ? getInvisibleRecaptchaContent(siteKey, action, onReady) :
-                                getNormalRecaptchaContent(config),
+                    html: reCaptchaType == type.invisible ? getInvisibleRecaptchaContent(siteKey, action, onReady, lang) :
+                                getNormalRecaptchaContent(config, lang),
                     baseUrl: url
                 }}
                 onShouldStartLoadWithRequest={this.onShouldStartLoadWithRequest}
